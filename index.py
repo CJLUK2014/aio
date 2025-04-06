@@ -12,12 +12,16 @@ BOT_TOKEN = os.environ.get('DISCORD_BOT_TOKEN')
 # Get the mod logs channel ID from environment variables
 MOD_LOGS_CHANNEL_ID = os.environ.get('MOD_LOGS_CHANNEL_ID')
 
-bot = commands.Bot(command_prefix='!')
+# We need to tell the bot what it's allowed to do!
+intents = discord.Intents.default()
+intents.message_content = True  # Make sure to add this if your bot reads messages!
+
+# Now we create the bot and give it the intents
+bot = commands.Bot(command_prefix='??', intents=intents)
 
 @bot.event
 async def on_ready():
     print(f'Logged in as {bot.user.name}')
-    # Here's the updated activity status:
     await bot.change_presence(activity=discord.Game(name='Made by Creative Vivo Designs'))
 
 @bot.command()
