@@ -161,13 +161,10 @@ async def serverinfo(ctx):
         embed.add_field(name="⚙️ Server Features", value="None", inline=False)
 
     created_at = guild.created_at
-    now = datetime.datetime.utcnow()
+    now = datetime.datetime.now(datetime.UTC)
+    if created_at.tzinfo is None or created_at.tzinfo.utcoffset(created_at) is None:
+        created_at = created_at.replace(tzinfo=datetime.timezone.utc)
     difference = now - created_at
-    years = difference.days // 365
-    remaining_days = difference.days % 365
-    months = remaining_days // 30
-    weeks = remaining_days // 7
-    days = remaining_days % 7
 
     created_ago = f"{created_at.strftime('%dth %b %y')} ({years} year{'s' if years != 1 else ''} and {months} month{'s' if months != 1 else ''} and {weeks} week{'s' if weeks != 1 else ''} ago)"
     embed.add_field(name="🗓️ Created", value=created_ago, inline=False)
