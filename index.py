@@ -4,7 +4,7 @@ import asyncio
 import random
 import urllib.parse
 import aiohttp
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import os
 
 # Get the bot token from environment variables
@@ -15,9 +15,13 @@ MOD_LOGS_CHANNEL_ID = os.environ.get('MOD_LOGS_CHANNEL_ID')
 # We need to tell the bot what it's allowed to do!
 intents = discord.Intents.default()
 intents.message_content = True  # Make sure to add this if your bot reads messages!
+intents.members = True # Make sure to add this if you want info about server members!
 
 # Now we create the bot and give it the intents
-bot = commands.Bot(command_prefix='??', intents=intents)
+bot = commands.Bot(command_prefix='!', intents=intents)
+
+# Let's store the time when the bot starts
+startup_time = datetime.now(timezone.utc)
 
 @bot.event
 async def on_ready():
@@ -93,18 +97,23 @@ async def userinfo(ctx, member: discord.Member = None):
         member = ctx.author
     embed = discord.Embed(title=f"ALL ABOUT **{member.name}**!", color=discord.Color.blue())
     embed.add_field(name="User ID", value=member.id, inline=False)
+    embed.add_field(name="Nickname", value=member.nick if member.nick else "No Nickname", inline=False)
     embed.add_field(name="Joined Server At", value=member.joined_at.strftime("%Y-%m-%d %H:%M:%S UTC"), inline=False)
     embed.add_field(name="Joined Discord At", value=member.created_at.strftime("%Y-%m-%d %H:%M:%S UTC"), inline=False)
+    roles = [role.name for role in member.roles if role != ctx.guild.default_role]
+    embed.add_field(name="Roles", value=", ".join(roles) if roles else "No Roles", inline=False)
     embed.set_thumbnail(url=member.avatar.url if member.avatar else member.default_avatar.url)
     await ctx.send(embed=embed)
 
 @bot.command()
 async def serverinfo(ctx):
-    embed = discord.Embed(title=f"**{ctx.guild.name}** - ALL THE DETAILS!", color=discord.Color.green())
+    embed = discord.Embed(title=f"**{ctx.guild.name}** - AMAZING DETAILS!", color=discord.Color.green())
     embed.add_field(name="Server ID", value=ctx.guild.id, inline=False)
     embed.add_field(name="Owner", value=ctx.guild.owner.mention, inline=False)
     embed.add_field(name="Member Count", value=ctx.guild.member_count, inline=False)
     embed.add_field(name="Created At", value=ctx.guild.created_at.strftime("%Y-%m-%d %H:%M:%S UTC"), inline=False)
+    embed.add_field(name="Boost Level", value=ctx.guild.premium_tier, inline=False)
+    embed.add_field(name="Boost Count", value=ctx.guild.premium_subscription_count, inline=False)
     embed.set_thumbnail(url=ctx.guild.icon.url if ctx.guild.icon else None)
     await ctx.send(embed=embed)
 
@@ -213,8 +222,13 @@ async def poll(ctx, question, *options):
 
 @bot.command(name='commands')
 async def list_commands(ctx):
-    command_list = [command.name for command in bot.commands]
-    await ctx.send(f"Here are all the commands you can use with this bot: `{'`, `'.join(command_list)}`")
+    embed = discord.Embed(title="🤖 All My Awesome Commands!", color=discord.Color.blurple())
+    command_list = []
+    for command in bot.commands:
+        if not command.hidden:  # Don't show hidden commands
+            command_list.append(f"`!{command.name}` - {command.help if command.help else 'No description available.'}")
+    embed.description = "\n".join(command_list)
+    await ctx.send(embed=embed)
 
 @bot.command(name='dm')
 async def send_dm(ctx, user: discord.Member, *, message):
@@ -225,6 +239,30 @@ async def send_dm(ctx, user: discord.Member, *, message):
         await ctx.send(f"Hmm, I couldn't DM {user.name}. They might have their DMs turned off for people who aren't friends.")
     except discord.HTTPException:
         await ctx.send("Something went wrong while trying to send the DM.")
+
+@bot.command()
+async def hug(ctx, member: discord.Member = None):
+    if member:
+        await ctx.send(f"{ctx.author.mention} gives a big hug to {member.mention}! 🤗")
+    else:
+        await ctx.send(f"{ctx.author.mention} gives a big self-hug! 🤗")
+
+@bot.command()
+async def pat(ctx, member: discord.Member = None):
+    if member:
+        await ctx.send(f"{ctx.author.mention} pats {member.mention} gently on the head! 👋")
+    else:
+        await ctx.send(f"{ctx.author.mention} pats themselves on the head! 👋")
+
+@bot.command(name='uptime')
+async def get_uptime(ctx):
+    now = datetime.now(timezone.utc)
+    uptime = now - startup_time
+    days = uptime.days
+    hours, remainder = divmod(uptime.seconds, 3600)
+    minutes, seconds = divmod(remainder, 60)
+    start_time_str = startup_time.strftime("%Y-%m-%d at %H:%M:%S UTC")
+    await ctx.send(f"My awesome journey started on **{start_time_str}**. I've been running for **{days}** days, **{hours}** hours, **{minutes}** minutes, and **{seconds}** seconds!")
 
 if BOT_TOKEN:
     bot.run(BOT_TOKEN)
