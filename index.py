@@ -131,7 +131,7 @@ async def serverinfo(ctx):
 
     embed.add_field(name="<:roles:1358383230167945287> Roles", value=len(guild.roles), inline=True) # Generic role emoji
     embed.add_field(name="Emojis", value=len(guild.emojis), inline=True) # Generic emoji
-    embed.add_field(name="🌎 Voice Region", value=guild.region, inline=True)
+    embed.add_field(name="🌎 Voice Region", value=str(guild.voice_channels[0].rtc_region if guild.voice_channels else "N/A"), inline=True)
 
     try:
         bans = await guild.bans()
