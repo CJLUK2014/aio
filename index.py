@@ -133,12 +133,12 @@ async def serverinfo(ctx):
     embed.add_field(name="Emojis", value=len(guild.emojis), inline=True) # Generic emoji
     embed.add_field(name="🌎 Voice Region", value=str(guild.voice_channels[0].rtc_region if guild.voice_channels else "N/A"), inline=True)
 
-    try:
-        bans = await guild.bans()
-        embed.add_field(name="🔨 Ban Count", value=len(bans), inline=True)
+     try:
+        ban_list = await guild.bans()
+        embed.add_field(name="🔨 Ban Count", value=len(ban_list), inline=True)
     except discord.Forbidden:
         embed.add_field(name="🔨 Ban Count", value="N/A (Bot doesn't have permission)", inline=True)
-
+        
     embed.add_field(name="<:boosts:1358383678946021497> Boosts", value=f"{guild.premium_subscription_count} (Level {guild.premium_tier})", inline=True) # Generic boost emoji
 
     features = []
