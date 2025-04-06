@@ -116,6 +116,8 @@ async def userinfo(ctx, member: discord.Member = None):
     await ctx.send(embed=embed)
 @bot.command(name='serverinfo', help='Shows detailed information about the server.')
 async def serverinfo(ctx):
+    import datetime
+    import pytz
     guild = ctx.guild
     embed = discord.Embed(title=guild.name, color=discord.Color.dark_green())
     embed.set_thumbnail(url=guild.icon.url if guild.icon else None)
@@ -161,25 +163,21 @@ async def serverinfo(ctx):
     else:
         embed.add_field(name="⚙️ Server Features", value="None", inline=False)
 
-     gmt = pytz.timezone('GMT')
-
+    gmt = pytz.timezone('GMT')
     now = datetime.datetime.now(gmt)
-
     created_at = guild.created_at
     if created_at.tzinfo is None or created_at.tzinfo.utcoffset(created_at) is None:
         created_at = created_at.replace(tzinfo=datetime.timezone.utc)
     created_at_gmt = created_at.astimezone(gmt)
-
     difference = now - created_at_gmt
     years = difference.days // 365
     remaining_days = difference.days % 365
     months = remaining_days // 30
     weeks = remaining_days // 7
     days = remaining_days % 7
-
     created_ago = f"{created_at_gmt.strftime('%dth %b %y %H:%M:%S GMT')} ({years} year{'s' if years != 1 else ''} and {months} month{'s' if months != 1 else ''} and {weeks} week{'s' if weeks != 1 else ''} ago)"
     embed.add_field(name="🗓️ Created (GMT)", value=created_ago, inline=False)
-    
+
 await ctx.send(embed=embed)
   
 @bot.command(name='ping', help='Checks the bot\'s latency (how fast it responds).')
