@@ -17,7 +17,8 @@ bot = commands.Bot(command_prefix='!')
 @bot.event
 async def on_ready():
     print(f'Logged in as {bot.user.name}')
-    await bot.change_presence(activity=discord.Game(name='Having fun!'))
+    # Here's the updated activity status:
+    await bot.change_presence(activity=discord.Game(name='Made by Creative Vivo Designs'))
 
 @bot.command()
 @commands.has_permissions(manage_messages=True)
