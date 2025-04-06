@@ -125,16 +125,16 @@ async def serverinfo(ctx):
     embed.add_field(name="Server ID", value=guild.id, inline=False)
     embed.add_field(name="👑 Owner", value=f"{guild.owner.mention} (ID: {guild.owner.id})", inline=False)
 
-    members_online = sum(1 for member in guild.members if member.status != discord.Status.offline)
+    members_online = sum(1 for member in guild.members if member.status != discord.Status.offline and member.status != discord.Status.invisible)
     members_offline = len(guild.members) - members_online
-    embed.add_field(name="<:online:313956277822080002> Members", value=f"🟢 Online: {members_online}\n⚪ Offline: {members_offline}\n<:members:887589885941534720> Total: {guild.member_count}", inline=True)
+    embed.add_field(name="Members", value=f"🟢 Online: {members_online}\n⚪ Offline: {members_offline}\n<:members:887589885941534720> Total: {guild.member_count}", inline=True)
 
     text_channels = len(guild.text_channels)
     voice_channels = len(guild.voice_channels)
-    embed.add_field(name="<:text_channel:887590784367431700> Channels", value=f"#️⃣ Text: {text_channels}\n🔊 Voice: {voice_channels}\n<:channels:887591287532036106> Total: {len(guild.channels)}", inline=True)
+    embed.add_field(name="<:channels:1358382823504875620> Channels", value=f"#️⃣ Text: {text_channels}\n🔊 Voice: {voice_channels}\n<:channels:1358382823504875620> Total: {len(guild.channels)}", inline=True)
 
-    embed.add_field(name="<:role:887591775638085652> Roles", value=len(guild.roles), inline=True)
-    embed.add_field(name="<:emoji:887592241840523304> Emojis", value=len(guild.emojis), inline=True)
+    embed.add_field(name="<:roles:1358383230167945287> Roles", value=len(guild.roles), inline=True)
+    embed.add_field(name="Emojis", value=len(guild.emojis), inline=True)
     embed.add_field(name="🌎 Voice Region", value=str(guild.voice_channels[0].rtc_region if guild.voice_channels else "N/A"), inline=True)
 
     try:
