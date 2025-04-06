@@ -125,7 +125,7 @@ async def serverinfo(ctx):
     embed.add_field(name="Server ID", value=guild.id, inline=False)
     embed.add_field(name="👑 Owner", value=f"{guild.owner.mention} (ID: {guild.owner.id})", inline=False)
 
-    members_online = sum(1 for member in guild.members if member.status != discord.Status.offline and member.status != discord.Status.invisible)
+   members_online = sum(1 for member in guild.members if member.status != discord.Status.offline)
     members_offline = len(guild.members) - members_online
     embed.add_field(name="Members", value=f"🟢 Online: {members_online}\n⚪ Offline: {members_offline}\n<:members:887589885941534720> Total: {guild.member_count}", inline=True)
 
