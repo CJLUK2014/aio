@@ -161,17 +161,27 @@ async def serverinfo(ctx):
     else:
         embed.add_field(name="⚙️ Server Features", value="None", inline=False)
 
+     gmt = pytz.timezone('GMT')
+
+    now = datetime.datetime.now(gmt)
+
     created_at = guild.created_at
-    now = datetime.datetime.now(datetime.UTC)
     if created_at.tzinfo is None or created_at.tzinfo.utcoffset(created_at) is None:
         created_at = created_at.replace(tzinfo=datetime.timezone.utc)
-    difference = now - created_at
+    created_at_gmt = created_at.astimezone(gmt)
 
-    created_ago = f"{created_at.strftime('%dth %b %y')} ({years} year{'s' if years != 1 else ''} and {months} month{'s' if months != 1 else ''} and {weeks} week{'s' if weeks != 1 else ''} ago)"
-    embed.add_field(name="🗓️ Created", value=created_ago, inline=False)
+    difference = now - created_at_gmt
+    years = difference.days // 365
+    remaining_days = difference.days % 365
+    months = remaining_days // 30
+    weeks = remaining_days // 7
+    days = remaining_days % 7
 
-    await ctx.send(embed=embed)
+    created_ago = f"{created_at_gmt.strftime('%dth %b %y %H:%M:%S GMT')} ({years} year{'s' if years != 1 else ''} and {months} month{'s' if months != 1 else ''} and {weeks} week{'s' if weeks != 1 else ''} ago)"
+    embed.add_field(name="🗓️ Created (GMT)", value=created_ago, inline=False)
     
+await ctx.send(embed=embed)
+  
 @bot.command(name='ping', help='Checks the bot\'s latency (how fast it responds).')
 async def ping(ctx):
     latency = round(bot.latency * 1000)
