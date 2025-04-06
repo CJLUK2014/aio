@@ -123,23 +123,23 @@ async def serverinfo(ctx):
 
     members_online = sum(1 for member in guild.members if member.status != discord.Status.offline)
     members_offline = len(guild.members) - members_online
-    embed.add_field(name="<:online:313956277822080002> Members", value=f"🟢 Online: {members_online}\n⚪ Offline: {members_offline}\n<:members:887589885941534720> Total: {guild.member_count}", inline=True) # Using standard Discord online emoji and a generic 'members' emoji (you might need a better one!)
+    embed.add_field(name="<:online:313956277822080002> Members", value=f"🟢 Online: {members_online}\n⚪ Offline: {members_offline}\n<:members:887589885941534720> Total: {guild.member_count}", inline=True)
 
     text_channels = len(guild.text_channels)
     voice_channels = len(guild.voice_channels)
-    embed.add_field(name="<:channels:1358382823504875620> Channels", value=f"#️⃣ Text: {text_channels}\n🔊 Voice: {voice_channels}\n<:channels:1358382823504875620> Total: {len(guild.channels)}", inline=True) # Using generic text/voice/channels emojis (you might need better ones!)
+    embed.add_field(name="<:text_channel:887590784367431700> Channels", value=f"#️⃣ Text: {text_channels}\n🔊 Voice: {voice_channels}\n<:channels:887591287532036106> Total: {len(guild.channels)}", inline=True)
 
-    embed.add_field(name="<:roles:1358383230167945287> Roles", value=len(guild.roles), inline=True) # Generic role emoji
-    embed.add_field(name="Emojis", value=len(guild.emojis), inline=True) # Generic emoji
+    embed.add_field(name="<:role:887591775638085652> Roles", value=len(guild.roles), inline=True)
+    embed.add_field(name="<:emoji:887592241840523304> Emojis", value=len(guild.emojis), inline=True)
     embed.add_field(name="🌎 Voice Region", value=str(guild.voice_channels[0].rtc_region if guild.voice_channels else "N/A"), inline=True)
 
-embed.add_field(name="<:boost:887592718247301120> Boosts", value=f"{guild.premium_subscription_count} (Level {guild.premium_tier})", inline=True)
     try:
         ban_list = await guild.bans()
         embed.add_field(name="🔨 Ban Count", value=len(ban_list), inline=True)
     except discord.Forbidden:
         embed.add_field(name="🔨 Ban Count", value="N/A (Bot doesn't have permission)", inline=True)
 
+    embed.add_field(name="<:boost:887592718247301120> Boosts", value=f"{guild.premium_subscription_count} (Level {guild.premium_tier})", inline=True)
 
     features = []
     if "AUTOMODERATION" in guild.features:
