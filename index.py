@@ -28,7 +28,7 @@ async def on_ready():
     print(f'Logged in as {bot.user.name}')
     await bot.change_presence(activity=discord.Game(name='Made by Creative Vivo Designs'))
 
-@bot.command()
+@bot.command(name='clear', help='Clears a specified number of messages.')
 @commands.has_permissions(manage_messages=True)
 async def clear(ctx, amount: int):
     if amount > 0:
@@ -44,7 +44,7 @@ async def clear_error(ctx, error):
     elif isinstance(error, commands.BadArgument):
         await ctx.send("Please enter a valid number of messages to clear.")
 
-@bot.command()
+@bot.command(name='ban', help='Bans a specified member from the server.')
 @commands.has_permissions(ban_members=True)
 async def ban(ctx, member: discord.Member, *, reason=None):
     if member == ctx.author:
@@ -91,7 +91,7 @@ async def ban_error(ctx, error):
     elif isinstance(error, commands.MemberNotFound):
         await ctx.send("Hmm, I can't find that person!")
 
-@bot.command()
+@bot.command(name='userinfo', help='Displays information about a specified user.')
 async def userinfo(ctx, member: discord.Member = None):
     if member is None:
         member = ctx.author
@@ -105,7 +105,7 @@ async def userinfo(ctx, member: discord.Member = None):
     embed.set_thumbnail(url=member.avatar.url if member.avatar else member.default_avatar.url)
     await ctx.send(embed=embed)
 
-@bot.command()
+@bot.command(name='serverinfo', help='Displays information about the current server.')
 async def serverinfo(ctx):
     embed = discord.Embed(title=f"**{ctx.guild.name}** - AMAZING DETAILS!", color=discord.Color.green())
     embed.add_field(name="Server ID", value=ctx.guild.id, inline=False)
@@ -117,16 +117,16 @@ async def serverinfo(ctx):
     embed.set_thumbnail(url=ctx.guild.icon.url if ctx.guild.icon else None)
     await ctx.send(embed=embed)
 
-@bot.command()
+@bot.command(name='say', help='Repeats the message you provide.')
 async def say(ctx, *, message):
     await ctx.send(message)
 
-@bot.command()
+@bot.command(name='flip', help='Flips a coin and shows the result.')
 async def flip(ctx):
     outcome = random.choice(["**HEADS!**", "**TAILS!**"])
     await ctx.send(outcome)
 
-@bot.command()
+@bot.command(name='roll', help='Rolls a specified number of dice with a specified number of sides.')
 async def roll(ctx, num_dice: int = 1, num_sides: int = 6):
     if num_dice > 0 and num_sides > 0 and num_dice <= 10 and num_sides <= 100:
         rolls = [random.randint(1, num_sides) for _ in range(num_dice)]
@@ -135,7 +135,7 @@ async def roll(ctx, num_dice: int = 1, num_sides: int = 6):
     else:
         await ctx.send('WHOA THERE! Invalid number of dice or sides! Try again with 1-10 dice and 1-100 sides.')
 
-@bot.command(name='8ball')
+@bot.command(name='8ball', help='Answers a yes/no question as an 8-ball would.')
 async def _8ball(ctx, *, question):
     responses = [
         "It is **certain!**", "**Definitely** so!", "**Without a doubt!**", "**Yes** - absolutely!",
@@ -148,11 +148,11 @@ async def _8ball(ctx, *, question):
     answer = random.choice(responses)
     await ctx.send(f'{ctx.author.mention} asked: {question}\n🎱 Answer: **{answer}**')
 
-@bot.command()
+@bot.command(name='bold', help='Makes the given text appear in bold.')
 async def bold(ctx, *, text):
     await ctx.send(f'**{text}**')
 
-@bot.command()
+@bot.command(name='image', help='Searches for an image online based on your query.')
 async def image(ctx, *, query):
     search_url = f"https://www.google.com/search?q={urllib.parse.quote_plus(query)}&tbm=isch"
     async with aiohttp.ClientSession() as session:
@@ -169,7 +169,7 @@ async def image(ctx, *, query):
             else:
                 await ctx.send("Oops! Something went wrong with the image search!")
 
-@bot.command()
+@bot.command(name='remind', help='Sets a reminder for you after a specified time.')
 async def remind(ctx, time_str, *, message):
     try:
         time_parts = time_str.lower().split()
@@ -204,7 +204,7 @@ async def remind(ctx, time_str, *, message):
         print(f"An error occurred: {e}")
         await ctx.send("Something went wrong with setting the reminder.")
 
-@bot.command()
+@bot.command(name='poll', help='Creates a poll with up to 10 options.')
 async def poll(ctx, question, *options):
     if len(options) < 2 or len(options) > 10:
         await ctx.send("Please provide between 2 and 10 poll options, each in quotes!")
@@ -220,17 +220,24 @@ async def poll(ctx, question, *options):
     for i in range(len(options)):
         await poll_message.add_reaction(reactions[i])
 
-@bot.command(name='commands')
+@bot.command(name='commands', help='Lists all available commands.')
 async def list_commands(ctx):
     embed = discord.Embed(title="🤖 All My Awesome Commands!", color=discord.Color.blurple())
     command_list = []
     for command in bot.commands:
         if not command.hidden:  # Don't show hidden commands
             command_list.append(f"`!{command.name}` - {command.help if command.help else 'No description available.'}")
-    embed.description = "\n".join(command_list)
-    await ctx.send(embed=embed)
 
-@bot.command(name='dm')
+    # Basic pagination - we'll send multiple messages if there are too many commands
+    commands_per_page = 10
+    pages = [command_list[i:i + commands_per_page] for i in range(0, len(command_list), commands_per_page)]
+
+    for i, page in enumerate(pages):
+        page_embed = discord.Embed(title=f"🤖 All My Awesome Commands! (Page {i+1}/{len(pages)})", color=discord.Color.blurple())
+        page_embed.description = "\n".join(page)
+        await ctx.send(embed=page_embed)
+
+@bot.command(name='dm', help='Sends a direct message to a specified user.')
 async def send_dm(ctx, user: discord.Member, *, message):
     try:
         await user.send(f"Hey! {ctx.author.name} asked me to send you this message: {message}")
@@ -240,21 +247,21 @@ async def send_dm(ctx, user: discord.Member, *, message):
     except discord.HTTPException:
         await ctx.send("Something went wrong while trying to send the DM.")
 
-@bot.command()
+@bot.command(name='hug', help='Sends a virtual hug to a specified user (or yourself).')
 async def hug(ctx, member: discord.Member = None):
     if member:
         await ctx.send(f"{ctx.author.mention} gives a big hug to {member.mention}! 🤗")
     else:
         await ctx.send(f"{ctx.author.mention} gives a big self-hug! 🤗")
 
-@bot.command()
+@bot.command(name='pat', help='Sends a virtual pat on the head to a specified user (or yourself).')
 async def pat(ctx, member: discord.Member = None):
     if member:
         await ctx.send(f"{ctx.author.mention} pats {member.mention} gently on the head! 👋")
     else:
         await ctx.send(f"{ctx.author.mention} pats themselves on the head! 👋")
 
-@bot.command(name='uptime')
+@bot.command(name='uptime', help='Shows how long the bot has been running.')
 async def get_uptime(ctx):
     now = datetime.now(timezone.utc)
     uptime = now - startup_time
@@ -264,7 +271,98 @@ async def get_uptime(ctx):
     start_time_str = startup_time.strftime("%Y-%m-%d at %H:%M:%S UTC")
     await ctx.send(f"My awesome journey started on **{start_time_str}**. I've been running for **{days}** days, **{hours}** hours, **{minutes}** minutes, and **{seconds}** seconds!")
 
-if BOT_TOKEN:
-    bot.run(BOT_TOKEN)
-else:
-    print("Error: DISCORD_BOT_TOKEN environment variable not set!")
+@bot.command(name='ping', help='Checks the bot\'s latency (how fast it responds).')
+async def ping(ctx):
+    latency = round(bot.latency * 1000)  # Convert to milliseconds
+    await ctx.send(f'Pong! 🏓 My latency is **{latency}ms**.')
+
+@bot.command(name='avatar', help='Displays the avatar of a specified user.')
+async def avatar(ctx, member: discord.Member = None):
+    user = member if member else ctx.author
+    avatar_url = user.avatar.url if user.avatar else user.default_avatar.url
+    embed = discord.Embed(title=f"Avatar of **{user.name}**", color=discord.Color.purple())
+    embed.set_image(url=avatar_url)
+    await ctx.send(embed=embed)
+
+@bot.command(name='servericon', help='Displays the icon of the current server.')
+async def servericon(ctx):
+    if ctx.guild.icon:
+        embed = discord.Embed(title=f"Server Icon of **{ctx.guild.name}**", color=discord.Color.dark_orange())
+        embed.set_image(url=ctx.guild.icon.url)
+        await ctx.send(embed=embed)
+    else:
+        await ctx.send("This server doesn't have an icon!")
+
+@bot.command(name='define', help='Searches for the definition of a word.')
+async def define(ctx, *, word):
+    async with aiohttp.ClientSession() as session:
+        async with session.get(f"https://api.dictionaryapi.dev/api/v2/entries/en/{word}") as response:
+            if response.status == 200:
+                data = await response.json()
+                if data:
+                    meaning = data[0]['meanings'][0]['definitions'][0]['definition']
+                    phonetic = data[0].get('phonetic', 'No phonetic available')
+                    embed = discord.Embed(title=f"Definition of **{word}**", color=discord.Color.gold())
+                    embed.add_field(name="Phonetic", value=phonetic, inline=False)
+                    embed.add_field(name="Definition", value=meaning, inline=False)
+                    await ctx.send(embed=embed)
+                else:
+                    await ctx.send(f"Hmm, I couldn't find a definition for **{word}**!")
+            elif response.status == 404:
+                await ctx.send(f"Sorry, I couldn't find the word **{word}** in my dictionary!")
+            else:
+                await ctx.send("Oops! Something went wrong while looking up the definition.")
+
+# Example of a command that might need pages (let's pretend we have a lot of server emojis)
+@bot.command(name='emojis', help='Lists all the emojis on the server.')
+async def emojis(ctx):
+    server_emojis = ctx.guild.emojis
+    if not server_emojis:
+        await ctx.send("This server doesn't have any custom emojis!")
+        return
+
+    emoji_list = [f"<:{emoji.name}:{emoji.id}>" for emoji in server_emojis]
+    emojis_per_page = 20
+    pages = [emoji_list[i:i + emojis_per_page] for i in range(0, len(emoji_list), emojis_per_page)]
+
+    if not pages:
+        return
+
+    async def send_page(page_num):
+        embed = discord.Embed(title=f"Server Emojis (Page {page_num + 1}/{len(pages)})", color=discord.Color.lighter_grey())
+        embed.description = " ".join(pages[page_num])
+        message = await ctx.send(embed=embed)
+        return message
+
+    current_page = 0
+    message = await send_page(current_page)
+
+    if len(pages) > 1:
+        await message.add_reaction("⬅️")
+        await message.add_reaction("➡️")
+
+        def check(reaction, user):
+            return user == ctx.author and reaction.message == message and str(reaction.emoji) in ["⬅️", "➡️"]
+
+        while True:
+            try:
+                reaction, user = await bot.wait_for('reaction_add', timeout=30.0, check=check)
+
+                if str(reaction.emoji) == "➡️" and current_page < len(pages) - 1:
+                    current_page += 1
+                    await message.edit(embed=discord.Embed(title=f"Server Emojis (Page {current_page + 1}/{len(pages)})", color=discord.Color.lighter_grey(), description=" ".join(pages[current_page])))
+                    await message.remove_reaction(reaction, user)
+                elif str(reaction.emoji) == "⬅️" and current_page > 0:
+                    current_page -= 1
+                    await message.edit(embed=discord.Embed(title=f"Server Emojis (Page {current_page + 1}/{len(pages)})", color=discord.Color.lighter_grey(), description=" ".join(pages[current_page])))
+                    await message.remove_reaction(reaction, user)
+                else:
+                    await message.remove_reaction(reaction, user)
+
+            except asyncio.TimeoutError:
+                for reaction in message.reactions:
+                    if reaction.me:
+                        await message.remove_reaction(reaction.emoji, bot.user)
+                break
+
+bot.run(BOT_TOKEN)
