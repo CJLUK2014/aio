@@ -134,7 +134,7 @@ async def serverinfo(ctx):
     embed.add_field(name="🌎 Voice Region", value=str(guild.voice_channels[0].rtc_region if guild.voice_channels else "N/A"), inline=True)
 
     try:
-        ban_list = await guild.bans()
+        ban_list = [entry async for entry in guild.bans()]
         embed.add_field(name="🔨 Ban Count", value=len(ban_list), inline=True)
     except discord.Forbidden:
         embed.add_field(name="🔨 Ban Count", value="N/A (Bot doesn't have permission)", inline=True)
