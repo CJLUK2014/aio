@@ -177,8 +177,7 @@ async def serverinfo(ctx):
     days = remaining_days % 7
     created_ago = f"{created_at_gmt.strftime('%dth %b %y %H:%M:%S GMT')} ({years} year{'s' if years != 1 else ''} and {months} month{'s' if months != 1 else ''} and {weeks} week{'s' if weeks != 1 else ''} ago)"
     embed.add_field(name="🗓️ Created (GMT)", value=created_ago, inline=False)
-
-await ctx.send(embed=embed)
+    await ctx.send(embed=embed)
   
 @bot.command(name='ping', help='Checks the bot\'s latency (how fast it responds).')
 async def ping(ctx):
