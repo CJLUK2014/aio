@@ -112,22 +112,67 @@ async def userinfo(ctx, member: discord.Member = None):
     embed.add_field(name="Status", value=user.status, inline=True)
     embed.set_thumbnail(url=user.avatar.url if user.avatar else user.default_avatar.url)
     await ctx.send(embed=embed)
-
 @bot.command(name='serverinfo', help='Shows detailed information about the server.')
 async def serverinfo(ctx):
     guild = ctx.guild
-    embed = discord.Embed(title=f"Server Info for {guild.name}", color=discord.Color.dark_green())
-    embed.add_field(name="Server ID", value=guild.id, inline=False)
-    embed.add_field(name="Owner", value=guild.owner.mention, inline=False)
-    embed.add_field(name="Created At", value=guild.created_at.strftime("%Y-%m-%d %H:%M:%S UTC"), inline=False)
-    embed.add_field(name="Members", value=guild.member_count, inline=True)
-    embed.add_field(name="Channels", value=len(guild.channels), inline=True)
-    embed.add_field(name="Roles", value=len(guild.roles), inline=True)
-    embed.add_field(name="Boost Level", value=f"Level {guild.premium_tier}", inline=True)
-    embed.add_field(name="Boost Count", value=guild.premium_subscription_count, inline=True)
+    embed = discord.Embed(title=guild.name, color=discord.Color.dark_green())
     embed.set_thumbnail(url=guild.icon.url if guild.icon else None)
-    await ctx.send(embed=embed)
 
+    embed.add_field(name="Server ID", value=guild.id, inline=False)
+    embed.add_field(name="👑 Owner", value=f"{guild.owner.mention} (ID: {guild.owner.id})", inline=False)
+
+    members_online = sum(1 for member in guild.members if member.status != discord.Status.offline)
+    members_offline = len(guild.members) - members_online
+    embed.add_field(name="<:online:313956277822080002> Members", value=f"🟢 Online: {members_online}\n⚪ Offline: {members_offline}\n<:members:887589885941534720> Total: {guild.member_count}", inline=True) # Using standard Discord online emoji and a generic 'members' emoji (you might need a better one!)
+
+    text_channels = len(guild.text_channels)
+    voice_channels = len(guild.voice_channels)
+    embed.add_field(name="<:channels:1358382823504875620> Channels", value=f"#️⃣ Text: {text_channels}\n🔊 Voice: {voice_channels}\n<:channels:1358382823504875620> Total: {len(guild.channels)}", inline=True) # Using generic text/voice/channels emojis (you might need better ones!)
+
+    embed.add_field(name="<:roles:1358383230167945287> Roles", value=len(guild.roles), inline=True) # Generic role emoji
+    embed.add_field(name="Emojis", value=len(guild.emojis), inline=True) # Generic emoji
+    embed.add_field(name="🌎 Voice Region", value=guild.region, inline=True)
+
+    try:
+        bans = await guild.bans()
+        embed.add_field(name="🔨 Ban Count", value=len(bans), inline=True)
+    except discord.Forbidden:
+        embed.add_field(name="🔨 Ban Count", value="N/A (Bot doesn't have permission)", inline=True)
+
+    embed.add_field(name="<:boosts:1358383678946021497> Boosts", value=f"{guild.premium_subscription_count} (Level {guild.premium_tier})", inline=True) # Generic boost emoji
+
+    features = []
+    if "AUTOMODERATION" in guild.features:
+        features.append("🛡️ Auto moderation")
+    if "COMMUNITY" in guild.features:
+        features.append("🏘️ Community")
+    if "GUILD_ONBOARDING" in guild.features:
+        features.append("👋 Guild onboarding")
+    if "GUILD_ONBOARDING_EVER_ENABLED" in guild.features:
+        features.append("✅ Guild onboarding ever enabled")
+    if "GUILD_ONBOARDING_HAS_PROMPTS" in guild.features:
+        features.append("❓ Guild onboarding has prompts")
+    if "NEWS" in guild.features:
+        features.append("📰 News")
+    if features:
+        embed.add_field(name="⚙️ Server Features", value="\n".join(features), inline=False)
+    else:
+        embed.add_field(name="⚙️ Server Features", value="None", inline=False)
+
+    created_at = guild.created_at
+    now = datetime.datetime.utcnow()
+    difference = now - created_at
+    years = difference.days // 365
+    remaining_days = difference.days % 365
+    months = remaining_days // 30
+    weeks = remaining_days // 7
+    days = remaining_days % 7
+
+    created_ago = f"{created_at.strftime('%dth %b %y')} ({years} year{'s' if years != 1 else ''} and {months} month{'s' if months != 1 else ''} and {weeks} week{'s' if weeks != 1 else ''} ago)"
+    embed.add_field(name="🗓️ Created", value=created_ago, inline=False)
+
+    await ctx.send(embed=embed)
+    
 @bot.command(name='ping', help='Checks the bot\'s latency (how fast it responds).')
 async def ping(ctx):
     latency = round(bot.latency * 1000)
